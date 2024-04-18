@@ -1,0 +1,7 @@
+[submodule "kokkos"]
+	path = kokkos
+	url = https://github.com/khuck/kokkos.git
+	branch = merge-develop-occupancy-tuning
+[submodule "apex"]
+	path = apex
+	url = https://github.com/UO-OACISS/apex.git
