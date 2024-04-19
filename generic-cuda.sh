@@ -6,7 +6,7 @@ dokokkos() {
 rm -rf build
 set -x
 cmake -B build \
--DCMAKE_BUILD_TYPE=Debug \
+-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 -DCMAKE_CXX_COMPILER=g++ \
 -DCMAKE_CXX_COMPILER=gcc \
 -DCMAKE_INSTALL_PREFIX=`pwd`/install \
