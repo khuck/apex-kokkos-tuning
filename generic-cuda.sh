@@ -25,9 +25,9 @@ cmake -B build \
 -DCUDAToolkit_ROOT=${CUDA} \
 .
 
-#cmake --build build --parallel 16
-#cmake --build build --parallel --target install
-#cmake --build build --target tuning.tests
+cmake --build build --parallel 16
+cmake --build build --parallel --target install
+cmake --build build --target tuning.tests
 }
 
 dokokkos
