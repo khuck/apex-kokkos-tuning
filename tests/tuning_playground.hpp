@@ -41,7 +41,7 @@ auto setup_helper(const Setup &setup, int num_iters, std::true_type) {
 
 template<typename Setup, typename Tunable>
 void tuned_kernel(int argc, char* argv[], Setup setup, Tunable tunable){
-  int num_iters = 1000;
+  int num_iters = 2000;
   Kokkos::initialize(argc, argv);
   {
     Kokkos::print_configuration(std::cout, false);
