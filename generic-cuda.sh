@@ -8,7 +8,7 @@ set -x
 cmake -B build \
 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 -DCMAKE_CXX_COMPILER=g++ \
--DCMAKE_CXX_COMPILER=gcc \
+-DCMAKE_C_COMPILER=gcc \
 -DCMAKE_INSTALL_PREFIX=`pwd`/install \
 -DKokkos_ENABLE_TUNING=ON \
 -DKokkos_ENABLE_OPENMP=ON \
