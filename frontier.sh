@@ -4,6 +4,7 @@ module reset
 module load cmake
 module swap PrgEnv-cray PrgEnv-amd
 module swap amd amd/5.7.1
+module unload darshan-runtime
 export CRAYPE_LINK_TYPE=dynamic
 
 dokokkos() {
@@ -30,7 +31,6 @@ cmake -B build \
 .
 
 cmake --build build --parallel 16
-#cmake --build build --verbose
 cmake --build build --parallel --target install
 cmake --build build --target tuning.tests
 }
