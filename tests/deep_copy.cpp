@@ -27,19 +27,19 @@
 #include <random>
 #include <tuple>
 int main(int argc, char *argv[]) {
+  constexpr const int data_size = 100;
   using left_type = Kokkos::View<float ***, Kokkos::LayoutLeft,
                                  Kokkos::DefaultExecutionSpace::memory_space>;
   using right_type = Kokkos::View<float ***, Kokkos::LayoutRight,
                                   Kokkos::DefaultExecutionSpace::memory_space>;
-  tuned_kernel(
-      argc, argv,
-      [&](const int total_iters) {
-        left_type left("left", 100, 100, 100);
-        right_type right("right", 100, 100, 100);
-        return std::make_pair(left, right);
-      },
-      [&](const int x, const int total_iters, left_type left,
-          right_type right) {
+  Kokkos::initialize(argc, argv);
+  {
+    Kokkos::print_configuration(std::cout, false);
+    left_type left("left", data_size, data_size, data_size);
+    right_type right("right", data_size, data_size, data_size);
+    for (int i = 0 ; i < Impl::max_iterations ; i++) {
         Kokkos::deep_copy(Kokkos::DefaultExecutionSpace{}, right, left);
-      });
+    }
+  }
+  Kokkos::finalize();
 }

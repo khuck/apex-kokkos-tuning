@@ -49,19 +49,18 @@ int main(int argc, char *argv[]) {
   using view_type =
       Kokkos::View<float **, Kokkos::DefaultExecutionSpace::memory_space>;
 
-  tuned_kernel(
-      argc, argv,
-      [&](const int total_iters) {
-        view_type left("left_inp", data_size, data_size);
-        view_type right("right_inp", data_size, data_size);
-        view_type output("output", data_size, data_size);
-        return std::make_tuple(left, right, output);
-      },
-      [&](const int x, const int total_iters, view_type left, view_type right,
-          view_type output) {
+  Kokkos::initialize(argc, argv);
+  {
+    Kokkos::print_configuration(std::cout, false);
+    view_type left("left_inp", data_size, data_size);
+    view_type right("right_inp", data_size, data_size);
+    view_type output("output", data_size, data_size);
+
+    for (int i = 0 ; i < Impl::max_iterations ; i++) {
         fastest_of(
             "bad_gemms",
             [&]() {
+              //std::cout << i << " Doing team gemm..." << std::endl;
               using team_policy =
                   Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
               using team_member = team_policy::member_type;
@@ -84,6 +83,7 @@ int main(int argc, char *argv[]) {
                   });
             },
             [&]() {
+              //std::cout << i << " Doing mdrange gemm..." << std::endl;
               Kokkos::parallel_for(
                   "bad_mdrange_gemm",
                   Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace,
@@ -95,5 +95,7 @@ int main(int argc, char *argv[]) {
                     }
                   });
             });
-      });
+    }
+  }
+  Kokkos::finalize();
 }

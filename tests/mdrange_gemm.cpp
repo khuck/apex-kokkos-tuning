@@ -45,29 +45,31 @@
 #include <random>
 #include <tuple>
 int main(int argc, char *argv[]) {
-  constexpr const int data_size = 1024;
+  constexpr const int data_size = 256;
   using view_type =
-      Kokkos::View<float **, Kokkos::DefaultExecutionSpace::memory_space>;
+    Kokkos::View<float **, Kokkos::DefaultExecutionSpace::memory_space>;
 
-  tuned_kernel(
-      argc, argv,
-      [&](const int total_iters) {
-        view_type left("left_inp", data_size, data_size);
-        view_type right("right_inp", data_size, data_size);
-        view_type output("output", data_size, data_size);
-        return std::make_tuple(left, right, output);
-      },
-            [&](const int data_size, const int total_iters,
-                view_type left, view_type right, view_type output) {
-              Kokkos::parallel_for(
-                  "mdrange_gemm",
-                  Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace,
-                                        Kokkos::Rank<2>>(
-                      {0, 0}, {data_size, data_size}),
-                  KOKKOS_LAMBDA(const int x, const int y) {
-                    for (int z = 0; z < data_size; ++z) {
-                      output(x, y) += left(x, z) * right(z, y);
-                    }
-                  });
-            });
+  Kokkos::initialize(argc, argv);
+  {
+    Kokkos::print_configuration(std::cout, false);
+    view_type left("left_inp", data_size, data_size);
+    view_type right("right_inp", data_size, data_size);
+    view_type output("output", data_size, data_size);
+
+    for (int i = 0 ; i < Impl::max_iterations ; i++) {
+      Kokkos::parallel_for(
+          "mdrange_gemm",
+          Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace,
+            Kokkos::Rank<2>>(
+            {0, 0}, {data_size, data_size}),
+          KOKKOS_LAMBDA(const int x, const int y) {
+            for (int z = 0; z < data_size; ++z) {
+                output(x, y) += left(x, z) * right(z, y);
+            }
+          }
+      );
+    }
+  }
+  Kokkos::finalize();
 }
+

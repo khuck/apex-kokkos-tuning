@@ -7,6 +7,8 @@
 
 namespace Impl {
 
+constexpr const int max_iterations{1000};
+
 struct empty {};
 
 template <typename Tunable, template <typename...> typename TupleLike,
@@ -110,11 +112,19 @@ void fastest_of(const std::string& label, Implementations... implementations){
     auto input_id = create_fastest_implementation_id();
     VariableValue picked_implementation = make_variable_value(var_id,int64_t(0));
     VariableValue which_kernel = make_variable_value(var_id,label.c_str());
+    which_kernel.value.int_value = -1;
     auto context_id = get_new_context_id();
     begin_context(context_id);
     set_input_values(context_id, 1, &picked_implementation);
     request_output_values(context_id, 1, &which_kernel);
-    fastest_of_helper(which_kernel.value.int_value, implementations...);
+    // if we didn't get a prediction, just alternate between methods.
+    if (which_kernel.value.int_value < 0) {
+        static int flipper{0};
+        fastest_of_helper(flipper, implementations...);
+        flipper = (flipper + 1) % 2;
+    } else {
+        fastest_of_helper(which_kernel.value.int_value, implementations...);
+    }
     end_context(context_id);
 }
 
