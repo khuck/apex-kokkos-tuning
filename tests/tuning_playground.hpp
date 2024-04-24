@@ -98,7 +98,7 @@ size_t create_fastest_implementation_id(){
 }
 
 template<typename ... Implementations>
-void fastest_of(const std::string& label, Implementations... implementations){
+void fastest_of(const std::string& label, const size_t count, Implementations... implementations){
     using namespace Kokkos::Tools::Experimental;
     auto tuner_iter = [&]() {
       auto my_tuner = ids_for_kernels.find(label);
@@ -121,7 +121,7 @@ void fastest_of(const std::string& label, Implementations... implementations){
     if (which_kernel.value.int_value < 0) {
         static int flipper{0};
         fastest_of_helper(flipper, implementations...);
-        flipper = (flipper + 1) % 2;
+        flipper = (flipper + 1) % count;
     } else {
         fastest_of_helper(which_kernel.value.int_value, implementations...);
     }

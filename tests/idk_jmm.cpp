@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0 ; i < Impl::max_iterations ; i++) {
         fastest_of(
-            "bad_gemms",
+            "bad_gemms", 2,
             [&]() {
               //std::cout << i << " Doing team gemm..." << std::endl;
               using team_policy =
