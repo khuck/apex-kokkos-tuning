@@ -54,7 +54,7 @@ foreach(tuning_prog ${tuning_programs})
         endif()
         set_tests_properties(test_${tuning_prog}_${tuning_policy} PROPERTIES
             ENVIRONMENT "OMP_NUM_THREADS=8;OMP_PROC_BIND=spread;OMP_PLACES=threads;APEX_KOKKOS_TUNING_WINDOW=${window};APEX_KOKKOS_TUNING_POLICY=${tuning_policy}"
-            PASS_REGULAR_EXPRESSION "Tuning has converged;New best"
+            PASS_REGULAR_EXPRESSION "Tuning has converged"
             )
         set_tests_properties(test_${tuning_prog}_${tuning_policy}_cached PROPERTIES
             ENVIRONMENT "OMP_NUM_THREADS=8;OMP_PROC_BIND=spread;OMP_PLACES=threads;APEX_KOKKOS_TUNING_WINDOW=${window};APEX_KOKKOS_TUNING_POLICY=${tuning_policy}"

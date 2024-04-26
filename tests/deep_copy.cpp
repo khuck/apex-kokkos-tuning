@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     Kokkos::print_configuration(std::cout, false);
     left_type left("left", data_size, data_size, data_size);
     right_type right("right", data_size, data_size, data_size);
-    for (int i = 0 ; i < Impl::max_iterations ; i++) {
+    for (int i = 0 ; i < 4 * Impl::max_iterations ; i++) {
         Kokkos::deep_copy(Kokkos::DefaultExecutionSpace{}, right, left);
     }
   }
