@@ -20,6 +20,7 @@ static const std::string scheduleNames[] = {"static", "dynamic"};
 
 using matrix2d = Kokkos::View<int **, Kokkos::OpenMP::memory_space>;
 namespace KTE = Kokkos::Tools::Experimental;
+namespace KE = Kokkos::Experimental;
 constexpr int lowerBound{100};
 constexpr int upperBound{999};
 
@@ -37,7 +38,7 @@ std::vector<int64_t> factorsOf(const int &size){
 // Helper function to generate thread counts
 std::vector<int64_t> makeRange(const int &size){
     std::vector<int64_t> range;
-    for(int i=1; i<=size; i++){
+    for(int i=2; i<=size; i+=2){
         range.push_back(i);
     }
     return range;
@@ -190,7 +191,7 @@ int main(int argc, char *argv[]){
         // scheduling policy setup
         out_value_id[3] = declareOutputSchedules("schedule_out");
         int64_t max_threads = std::min(std::thread::hardware_concurrency(),
-                (unsigned int)(Kokkos::DefaultExecutionSpace::concurrency()));
+                (unsigned int)(Kokkos::OpenMP::concurrency()));
         out_value_id[4] = declareOutputThreadCount("thread_count", max_threads);
         // sehcduling policy - end setup
 
@@ -199,8 +200,8 @@ int main(int argc, char *argv[]){
             KTE::make_variable_value(out_value_id[0], int64_t(1)),
             KTE::make_variable_value(out_value_id[1], int64_t(1)),
             KTE::make_variable_value(out_value_id[2], int64_t(1)),
-            KTE::make_variable_value(out_value_id[3], int64_t(StaticSchedule))
-            //KTE::make_variable_value(out_value_id[4], int64_t(max_threads)) // no way to change kokkos after init?
+            KTE::make_variable_value(out_value_id[3], int64_t(StaticSchedule)) /*,
+            KTE::make_variable_value(out_value_id[4], int64_t(max_threads))*/
         };
 
         for (int i = 0 ; i < Impl::max_iterations ; i++) {
@@ -221,27 +222,26 @@ int main(int argc, char *argv[]){
             // get our schedule and thread count
             int scheduleType = answer_vector[3].value.int_value;
             // there's probably a better way to set the thread count?
-            //omp_set_num_threads(answer_vector[4].value.int_value);
+            /*
+            int num_threads = answer_vector[4].value.int_value;
+            int leftover_threads = max_threads - answer_vector[4].value.int_value;
+            */
+            int num_threads = max_threads;
+            int leftover_threads = 0;
 
             // Report the tuning, if desired
+            /*
             std::cout << "Tiling: [" << ti << "," << tj << "," << tk << "], ";
             std::cout << "Schedule: " << scheduleNames[scheduleType] << ", ";
-            //std::cout << "Threads: " << answer_vector[4].value.int_value;
+            std::cout << "Threads: " << answer_vector[4].value.int_value;
             std::cout << std::endl;
+            */
 
-            // default scheduling policy, default tiling
-            Kokkos::MDRangePolicy<Kokkos::OpenMP,
-                Kokkos::Rank<3>> default_policy({0,0,0},{M,N,P});
-            // static scheduling, tuned tiling
-            Kokkos::MDRangePolicy<Kokkos::OpenMP,
-                Kokkos::Schedule<Kokkos::Static>,
-                Kokkos::Rank<3>> static_policy({0,0,0},{M,N,P},{ti,tj,tk});
-            // dynamic scheduling, tuned tiling
-            Kokkos::MDRangePolicy<Kokkos::OpenMP,
-                Kokkos::Schedule<Kokkos::Dynamic>,
-                Kokkos::Rank<3>> dynamic_policy({0,0,0},{M,N,P},{ti,tj,tk});
             // no tuning?
             if (!tuning) {
+                // default scheduling policy, default tiling
+                Kokkos::MDRangePolicy<Kokkos::OpenMP,
+                    Kokkos::Rank<3>> default_policy({0,0,0},{M,N,P});
                 Kokkos::parallel_for(
                         mm2D, default_policy, KOKKOS_LAMBDA(int i, int j, int k){
                         re(i,j) += ar1(i,j) * ar2(j,k);
@@ -249,18 +249,57 @@ int main(int argc, char *argv[]){
                         );
             // use static schedule?
             } else if (scheduleType == StaticSchedule) {
-                Kokkos::parallel_for(
-                        mm2D, static_policy, KOKKOS_LAMBDA(int i, int j, int k){
-                        re(i,j) += ar1(i,j) * ar2(j,k);
-                        }
-                        );
-            // use dynamic schedule?
+                // if using max threads, no need to partition
+                if (num_threads == max_threads) {
+                    // static scheduling, tuned tiling
+                    Kokkos::MDRangePolicy<Kokkos::OpenMP,
+                        Kokkos::Schedule<Kokkos::Static>,
+                        Kokkos::Rank<3>> static_policy({0,0,0},{M,N,P},{ti,tj,tk});
+                    Kokkos::parallel_for(
+                            mm2D, static_policy, KOKKOS_LAMBDA(int i, int j, int k){
+                            re(i,j) += ar1(i,j) * ar2(j,k);
+                            }
+                            );
+                } else {
+                    // partition the space so we can tune the number of threads
+                    auto instances = KE::partition_space(Kokkos::OpenMP(),
+                        num_threads, leftover_threads);
+                    // static scheduling, tuned tiling
+                    Kokkos::MDRangePolicy<Kokkos::OpenMP,
+                        Kokkos::Schedule<Kokkos::Static>,
+                        Kokkos::Rank<3>> static_policy(instances[0],{0,0,0},{M,N,P},{ti,tj,tk});
+                    Kokkos::parallel_for(
+                            mm2D, static_policy, KOKKOS_LAMBDA(int i, int j, int k){
+                            re(i,j) += ar1(i,j) * ar2(j,k);
+                            }
+                            );
+                }
             } else {
-                Kokkos::parallel_for(
-                        mm2D, dynamic_policy, KOKKOS_LAMBDA(int i, int j, int k){
-                        re(i,j) += ar1(i,j) * ar2(j,k);
-                        }
-                        );
+                // if using max threads, no need to partition
+                if (num_threads == max_threads) {
+                    // dynamic scheduling, tuned tiling
+                    Kokkos::MDRangePolicy<Kokkos::OpenMP,
+                        Kokkos::Schedule<Kokkos::Dynamic>,
+                        Kokkos::Rank<3>> dynamic_policy({0,0,0},{M,N,P},{ti,tj,tk});
+                    Kokkos::parallel_for(
+                            mm2D, dynamic_policy, KOKKOS_LAMBDA(int i, int j, int k){
+                            re(i,j) += ar1(i,j) * ar2(j,k);
+                            }
+                            );
+                } else {
+                    // partition the space so we can tune the number of threads
+                    auto instances = KE::partition_space(Kokkos::OpenMP(),
+                        num_threads, leftover_threads);
+                    // dynamic scheduling, tuned tiling
+                    Kokkos::MDRangePolicy<Kokkos::OpenMP,
+                        Kokkos::Schedule<Kokkos::Dynamic>,
+                        Kokkos::Rank<3>> dynamic_policy(instances[0],{0,0,0},{M,N,P},{ti,tj,tk});
+                    Kokkos::parallel_for(
+                            mm2D, dynamic_policy, KOKKOS_LAMBDA(int i, int j, int k){
+                            re(i,j) += ar1(i,j) * ar2(j,k);
+                            }
+                            );
+                }
             }
             KTE::end_context(context);
         }
