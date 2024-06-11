@@ -45,9 +45,11 @@ foreach(tuning_prog ${tuning_programs})
                 rm -f "${CMAKE_CURRENT_BINARY_DIR}/apex_converged_tuning.yaml")
         set_tests_properties(test_${tuning_prog}_${tuning_policy}_cleanup
             PROPERTIES FIXTURES_CLEANUP test_${tuning_prog}_${tuning_policy}_teardown)
-        if(${tuning_policy} STREQUAL "exhaustive")
+        if(${tuning_policy} STREQUAL "exhaustive" OR
+           ${tuning_policy} STREQUAL "random")
             set(window "1")
-        elseif(${tuning_policy} STREQUAL "random")
+        elseif(${tuning_policy} STREQUAL "simulated_annealing" AND
+               ${tuning_prog} STREQUAL "idk_jmm")
             set(window "1")
         else()
             set(window "2")
