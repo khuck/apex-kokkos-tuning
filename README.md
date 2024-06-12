@@ -10,3 +10,6 @@ The steps to configure and build are the same as configuring/building APEX and K
 Take note - the only CMake variable that is _required_ is the `-DKokkos_ENABLE_TUNING=ON` setting, which enables the tuning support in Kokkos.
 
 Another note - this repo uses a git submodule that is a fork/branch from the main Kokkos repository. That fork/branch contains the occupancy tuning support that has not yet been merged into the main repository, see PR [6788](https://github.com/kokkos/kokkos/pull/6788).
+
+For slides with an overview of this repository, see [http://www.nic.uoregon.edu/~khuck/kokkos/2024-Kokkos-Tuning-Tutorial/](http://www.nic.uoregon.edu/~khuck/kokkos/2024-Kokkos-Tuning-Tutorial/).
+
