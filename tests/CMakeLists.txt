@@ -17,6 +17,18 @@ set(tuning_policies
     random
     simulated_annealing)
 
+include(ProcessorCount)
+ProcessorCount(NPROC)
+if(${NPROC} EQUAL 0)
+    set(NPROC 8)
+else()
+    if(${NPROC} LESS_EQUAL 8)
+        set(NPROC 4)
+    else()
+        set(NPROC 8)
+    endif()
+endif()
+
 foreach(tuning_prog ${tuning_programs})
     set(sources ${tuning_prog}.cpp)
     source_group("Source Files" FILES ${sources})
@@ -30,7 +42,7 @@ foreach(tuning_prog ${tuning_programs})
     add_test (NAME test_${tuning_prog}_no_tuning
         COMMAND ${CMAKE_BINARY_DIR}/apex/src/scripts/apex_exec --apex:kokkos-fence ${CMAKE_BINARY_DIR}/tests/${tuning_prog})
     set_tests_properties(test_${tuning_prog}_no_tuning PROPERTIES
-        ENVIRONMENT "OMP_NUM_THREADS=8;OMP_PROC_BIND=spread;OMP_PLACES=threads")
+        ENVIRONMENT "OMP_NUM_THREADS=${NPROC};OMP_PROC_BIND=spread;OMP_PLACES=threads")
 
     foreach(tuning_policy ${tuning_policies})
         # Test the tuning
@@ -55,11 +67,11 @@ foreach(tuning_prog ${tuning_programs})
             set(window "2")
         endif()
         set_tests_properties(test_${tuning_prog}_${tuning_policy} PROPERTIES
-            ENVIRONMENT "OMP_NUM_THREADS=8;OMP_PROC_BIND=spread;OMP_PLACES=threads;APEX_KOKKOS_TUNING_WINDOW=${window};APEX_KOKKOS_TUNING_POLICY=${tuning_policy}"
+            ENVIRONMENT "OMP_NUM_THREADS=${NPROC};OMP_PROC_BIND=spread;OMP_PLACES=threads;APEX_KOKKOS_TUNING_WINDOW=${window};APEX_KOKKOS_TUNING_POLICY=${tuning_policy}"
             PASS_REGULAR_EXPRESSION "Tuning has converged"
             )
         set_tests_properties(test_${tuning_prog}_${tuning_policy}_cached PROPERTIES
-            ENVIRONMENT "OMP_NUM_THREADS=8;OMP_PROC_BIND=spread;OMP_PLACES=threads;APEX_KOKKOS_TUNING_WINDOW=${window};APEX_KOKKOS_TUNING_POLICY=${tuning_policy}"
+            ENVIRONMENT "OMP_NUM_THREADS=${NPROC};OMP_PROC_BIND=spread;OMP_PLACES=threads;APEX_KOKKOS_TUNING_WINDOW=${window};APEX_KOKKOS_TUNING_POLICY=${tuning_policy}"
             PASS_REGULAR_EXPRESSION "Reading cache of Kokkos tuning results;Tuning has converged;New best"
             FIXTURES_REQUIRED test_${tuning_prog}_${tuning_policy}_teardown)
     endforeach()
