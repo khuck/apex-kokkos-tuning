@@ -45,7 +45,7 @@
 #include <random>
 #include <tuple>
 int main(int argc, char *argv[]) {
-  constexpr const int data_size = 256;
+  constexpr const int data_size = 900;
   using view_type =
     Kokkos::View<float **, Kokkos::DefaultExecutionSpace::memory_space>;
 
