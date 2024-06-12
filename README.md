@@ -8,3 +8,5 @@ The steps to configure and build are the same as configuring/building APEX and K
 * [frontier.sh](frontier.sh) - configure and build for an AMD-GPU HPC system like [Frontier](https://docs.olcf.ornl.gov/systems/frontier_user_guide.html).
 
 Take note - the only CMake variable that is _required_ is the `-DKokkos_ENABLE_TUNING=ON` setting, which enables the tuning support in Kokkos.
+
+Another note - this repo uses a git submodule that is a fork/branch from the main Kokkos repository. That fork/branch contains the occupancy tuning support that has not yet been merged into the main repository, see PR [6788](https://github.com/kokkos/kokkos/pull/6788).
