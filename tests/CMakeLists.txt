@@ -3,12 +3,17 @@ add_custom_target(tuning.tests)
 
 # Our set of programs
 set(tuning_programs
-    deep_copy
+    deep_copy_2
+    deep_copy_3
+    deep_copy_4
+    deep_copy_5
+    deep_copy_6
     idk_jmm
     mm2d_tiling
     mdrange_gemm
     mdrange_gemm_occupancy
-    occupancy)
+    occupancy
+    )
 
 # Our set of tuning methods to test
 set(tuning_policies
