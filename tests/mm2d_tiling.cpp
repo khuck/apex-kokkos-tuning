@@ -54,8 +54,8 @@ void reportOptions(std::vector<int64_t>& candidates,
 
 // helper function for matrix init
 void initArray(matrix2d& ar, size_t d1, size_t d2) {
-    for(int i=0; i<d1; i++){
-        for(int j=0; j<d2; j++){
+    for(size_t i=0; i<d1; i++){
+        for(size_t j=0; j<d2; j++){
                 ar(i,j)=(rand() % (upperBound - lowerBound + 1)) + lowerBound;
         }
     }
@@ -63,8 +63,8 @@ void initArray(matrix2d& ar, size_t d1, size_t d2) {
 
 // helper function for matrix init
 void zeroArray(matrix2d& ar, size_t d1, size_t d2) {
-    for(int i=0; i<d1; i++){
-        for(int j=0; j<d2; j++){
+    for(size_t i=0; i<d1; i++){
+        for(size_t j=0; j<d2; j++){
                 ar(i,j)=0.0;
         }
     }

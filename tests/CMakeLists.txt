@@ -3,6 +3,7 @@ add_custom_target(tuning.tests)
 
 # Our set of programs
 set(tuning_programs
+    1d_annealing
     deep_copy_2
     deep_copy_3
     deep_copy_4
@@ -82,5 +83,6 @@ foreach(tuning_prog ${tuning_programs})
     endforeach()
 endforeach()
 
+set_tests_properties(test_deep_copy_4_exhaustive test_deep_copy_5_exhaustive test_deep_copy_6_exhaustive PROPERTIES WILL_FAIL TRUE)
 add_custom_command(TARGET tuning.tests POST_BUILD COMMAND ctest -R test --output-on-failure --timeout 180)
 

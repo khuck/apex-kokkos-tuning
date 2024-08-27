@@ -75,7 +75,7 @@ size_t create_categorical_int_tuner(std::string name, size_t num_options){
   info.type = ValueType::kokkos_value_int64;
   info.valueQuantity = CandidateValueType::kokkos_value_set;
   std::vector<int64_t> options;
-  for(int x=0;x<num_options;++x){
+  for(size_t x=0;x<num_options;++x){
     options.push_back(x);
   }
   info.candidates = make_candidate_set(options.size(), options.data());
