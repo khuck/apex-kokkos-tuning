@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
         /* Simple 2d, 9-point stencil update - use the average of the surrounding and current cells */
         const auto kernel = KOKKOS_LAMBDA(const int x, const int y) {
             dest(x,y) = (source(x-1,y-1) + source(x,y-1) + source(x+1,y-1) +
-                            source(x-1,y)   + source(x,y)   + source(x+1,y)   +
-                            source(x-1,y+1) + source(x,y+1) + source(x+1,y+1)) / 9.0;
+                         source(x-1,y)   + source(x,y)   + source(x+1,y)   +
+                         source(x-1,y+1) + source(x,y+1) + source(x+1,y+1)) / 9.0;
         };
         /* We iterate so that we have enough samples to explore the search space.
          * In a real application, this kernel would get called multiple times over
