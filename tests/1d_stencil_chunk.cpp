@@ -1,14 +1,14 @@
 /**
  * 1D_annealing
  *
- * Complexity: low
+ * Complexity: medium
  * Tuning problem:
  *
  * Kokkos is executing a simple 1d stencil annealing (heat transfer) problem.
  *
- * This problem uses a Range policy for all 3 instances, and the kernel
- * is the same for all 3 instances. However, there are three Engine instances
- * to choose between: Serial, Static OpenMP and Dynamic OpenMP.
+ * This problem uses a Range policy for all instances, and the kernel
+ * is the same for all instances. However, APEX will tune the number of threads,
+ * the chunk size, and the OpenMP schedule.
  *
  */
 #include <tuning_playground.hpp>
