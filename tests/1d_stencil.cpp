@@ -19,18 +19,39 @@
 #include <iostream>
 #include <random>
 #include <tuple>
+
+constexpr int length{32768}; // array length
+constexpr int lowerBound{100};
+constexpr int upperBound{999};
+
+// helper function for matrix init
+void initArray(Kokkos::View<double *, Kokkos::HostSpace>& ar, size_t d1) {
+    for(size_t i=0; i<d1; i++){
+        ar(i)=(rand() % (upperBound - lowerBound + 1)) + lowerBound;
+    }
+}
+
 int main(int argc, char *argv[]) {
     Kokkos::initialize(argc, argv);
     {
         Kokkos::print_configuration(std::cout, false);
-        int length = 32768;
         /* To keep the kernel simple, we don't update first or last cells */
         int min_index = 1;
         int max_index = length - 1;
-        Kokkos::View<double *, Kokkos::HostSpace> stencil("stencil", length);
+        /* Create initial view */
+        Kokkos::View<double *, Kokkos::HostSpace> left("left stencil", length);
+        /* Initialize the view */
+        initArray(left, length);
+        /* Create a destination view */
+        Kokkos::View<double *, Kokkos::HostSpace> right("right stencil", length);
+        /* Copy the initial view */
+        Kokkos::deep_copy(Kokkos::DefaultExecutionSpace{}, right, left);
+        /* Create two view references, a source and a destination */
+        auto& source = left;
+        auto& dest = right;
         /* Simple 1d, 3-point stencil update - use the average of the left, right and current cells */
         const auto kernel = KOKKOS_LAMBDA(const int x) {
-            stencil(x) = (stencil(x-1) + stencil(x) + stencil(x+1)) / 3.0;
+            dest(x) = (source(x-1) + source(x) + source(x+1)) / 3.0;
         };
         /* We iterate so that we have enough samples to explore the search space.
          * In a real application, this kernel would get called multiple times over
@@ -53,6 +74,10 @@ int main(int argc, char *argv[]) {
                     kernel);
                 }
             );
+            /* Swap the views */
+            auto& tmp = source;
+            source = dest;
+            dest = tmp;
         }
     }
     Kokkos::finalize();

@@ -22,20 +22,43 @@
 #include <iostream>
 #include <random>
 #include <tuple>
+
+constexpr int length{64};
+constexpr int lowerBound{100};
+constexpr int upperBound{999};
+
+// helper function for matrix init
+void initArray(Kokkos::View<double **, Kokkos::HostSpace>& ar, size_t d1, size_t d2) {
+    for(size_t i=0; i<d1; i++){
+        for(size_t j=0; j<d2; j++){
+            ar(i,j)=(rand() % (upperBound - lowerBound + 1)) + lowerBound;
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
     Kokkos::initialize(argc, argv);
     {
         Kokkos::print_configuration(std::cout, false);
-        int length = 64;
         /* To keep the kernel simple, we don't update first or last cells */
         int min_index = 1;
         int max_index = length - 1;
-        Kokkos::View<double **, Kokkos::HostSpace> stencil("stencil", length, length);
+        /* Create initial view */
+        Kokkos::View<double **, Kokkos::HostSpace> left("left stencil", length, length);
+        /* Initialize the view */
+        initArray(left, length, length);
+        /* Create a destination view */
+        Kokkos::View<double **, Kokkos::HostSpace> right("right stencil", length, length);
+        /* Copy the initial view */
+        Kokkos::deep_copy(Kokkos::DefaultExecutionSpace{}, right, left);
+        /* Create two view references, a source and a destination */
+        auto& source = left;
+        auto& dest = right;
         /* Simple 2d, 9-point stencil update - use the average of the surrounding and current cells */
         const auto kernel = KOKKOS_LAMBDA(const int x, const int y) {
-            stencil(x,y) = (stencil(x-1,y-1) + stencil(x,y-1) + stencil(x+1,y-1) +
-                            stencil(x-1,y)   + stencil(x,y)   + stencil(x+1,y)   +
-                            stencil(x-1,y+1) + stencil(x,y+1) + stencil(x+1,y+1)) / 9.0;
+            dest(x,y) = (source(x-1,y-1) + source(x,y-1) + source(x+1,y-1) +
+                            source(x-1,y)   + source(x,y)   + source(x+1,y)   +
+                            source(x-1,y+1) + source(x,y+1) + source(x+1,y+1)) / 9.0;
         };
         /* We iterate so that we have enough samples to explore the search space.
          * In a real application, this kernel would get called multiple times over
@@ -55,6 +78,10 @@ int main(int argc, char *argv[]) {
                     kernel);
                 }
             );
+            /* Swap the views */
+            auto& tmp = source;
+            source = dest;
+            dest = tmp;
         }
     }
     Kokkos::finalize();
