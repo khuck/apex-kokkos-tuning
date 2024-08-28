@@ -200,10 +200,14 @@ int main(int argc, char *argv[]){
             KTE::make_variable_value(out_value_id[0], int64_t(1)),
             KTE::make_variable_value(out_value_id[1], int64_t(1)),
             KTE::make_variable_value(out_value_id[2], int64_t(1)),
-            KTE::make_variable_value(out_value_id[3], int64_t(StaticSchedule)) /*,
-            KTE::make_variable_value(out_value_id[4], int64_t(max_threads))*/
+            KTE::make_variable_value(out_value_id[3], int64_t(StaticSchedule)),
+            KTE::make_variable_value(out_value_id[4], int64_t(max_threads))
         };
 
+        /* Declare the kernel that does the work */
+        const auto kernel = KOKKOS_LAMBDA(int i, int j, int k){
+            re(i,j) += ar1(i,j) * ar2(j,k);
+        };
         for (int i = 0 ; i < Impl::max_iterations ; i++) {
             // request a context id
             size_t context = KTE::get_new_context_id();
@@ -222,12 +226,8 @@ int main(int argc, char *argv[]){
             // get our schedule and thread count
             int scheduleType = answer_vector[3].value.int_value;
             // there's probably a better way to set the thread count?
-            /*
             int num_threads = answer_vector[4].value.int_value;
             int leftover_threads = max_threads - answer_vector[4].value.int_value;
-            */
-            int num_threads = max_threads;
-            int leftover_threads = 0;
 
             // Report the tuning, if desired
             /*
@@ -255,11 +255,7 @@ int main(int argc, char *argv[]){
                     Kokkos::MDRangePolicy<Kokkos::OpenMP,
                         Kokkos::Schedule<Kokkos::Static>,
                         Kokkos::Rank<3>> static_policy({0,0,0},{M,N,P},{ti,tj,tk});
-                    Kokkos::parallel_for(
-                            mm2D, static_policy, KOKKOS_LAMBDA(int i, int j, int k){
-                            re(i,j) += ar1(i,j) * ar2(j,k);
-                            }
-                            );
+                    Kokkos::parallel_for(mm2D, static_policy, kernel);
                 } else {
                     // partition the space so we can tune the number of threads
                     auto instances = KE::partition_space(Kokkos::OpenMP(),
@@ -268,11 +264,7 @@ int main(int argc, char *argv[]){
                     Kokkos::MDRangePolicy<Kokkos::OpenMP,
                         Kokkos::Schedule<Kokkos::Static>,
                         Kokkos::Rank<3>> static_policy(instances[0],{0,0,0},{M,N,P},{ti,tj,tk});
-                    Kokkos::parallel_for(
-                            mm2D, static_policy, KOKKOS_LAMBDA(int i, int j, int k){
-                            re(i,j) += ar1(i,j) * ar2(j,k);
-                            }
-                            );
+                    Kokkos::parallel_for(mm2D, static_policy, kernel);
                 }
             } else {
                 // if using max threads, no need to partition
@@ -282,10 +274,7 @@ int main(int argc, char *argv[]){
                         Kokkos::Schedule<Kokkos::Dynamic>,
                         Kokkos::Rank<3>> dynamic_policy({0,0,0},{M,N,P},{ti,tj,tk});
                     Kokkos::parallel_for(
-                            mm2D, dynamic_policy, KOKKOS_LAMBDA(int i, int j, int k){
-                            re(i,j) += ar1(i,j) * ar2(j,k);
-                            }
-                            );
+                            mm2D, dynamic_policy, kernel);
                 } else {
                     // partition the space so we can tune the number of threads
                     auto instances = KE::partition_space(Kokkos::OpenMP(),
@@ -295,10 +284,7 @@ int main(int argc, char *argv[]){
                         Kokkos::Schedule<Kokkos::Dynamic>,
                         Kokkos::Rank<3>> dynamic_policy(instances[0],{0,0,0},{M,N,P},{ti,tj,tk});
                     Kokkos::parallel_for(
-                            mm2D, dynamic_policy, KOKKOS_LAMBDA(int i, int j, int k){
-                            re(i,j) += ar1(i,j) * ar2(j,k);
-                            }
-                            );
+                            mm2D, dynamic_policy, kernel);
                 }
             }
             KTE::end_context(context);

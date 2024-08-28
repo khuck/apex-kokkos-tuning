@@ -91,6 +91,6 @@ foreach(tuning_prog ${tuning_programs})
     endforeach()
 endforeach()
 
-set_tests_properties(test_deep_copy_4_exhaustive test_deep_copy_5_exhaustive test_deep_copy_6_exhaustive PROPERTIES WILL_FAIL TRUE)
+set_tests_properties(test_deep_copy_4_exhaustive test_deep_copy_5_exhaustive test_deep_copy_6_exhaustive test_mm2d_tiling_exhaustive PROPERTIES WILL_FAIL TRUE)
 add_custom_command(TARGET tuning.tests POST_BUILD COMMAND ctest -R test --output-on-failure --timeout 180)
 
