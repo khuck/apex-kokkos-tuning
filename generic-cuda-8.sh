@@ -6,33 +6,34 @@
 # -DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_CUDA_LAMBDA=ON -DKokkos_ARCH_AMPERE80=ON \
 # -DKokkos_ARCH_NATIVE=ON
 
+module load cuda/11.7 cmake
 
 dokokkos() {
-rm -rf build
+rm -rf build8
 set -x
-cmake -B build \
--DCMAKE_BUILD_TYPE=RelWithDebInfo \
+cmake -B build8 \
+-DCMAKE_BUILD_TYPE=Debug \
 -DCMAKE_CXX_COMPILER=g++ \
 -DCMAKE_C_COMPILER=gcc \
--DCMAKE_INSTALL_PREFIX=`pwd`/install \
+-DCMAKE_INSTALL_PREFIX=`pwd`/install8 \
 -DKokkos_ENABLE_TUNING=ON \
 -DKokkos_ENABLE_OPENMP=ON \
 -DKokkos_ENABLE_SERIAL=ON \
 -DKokkos_ENABLE_CUDA=ON \
 -DKokkos_ENABLE_CUDA_LAMBDA=ON \
 -DKokkos_ARCH_AMPERE80=ON \
--DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=ON \
 -DKokkos_ARCH_NATIVE=ON \
 -DKokkos_ENABLE_COMPILER_WARNINGS=ON \
 -DKokkos_ENABLE_DEPRECATED_CODE_4=ON \
+-DKokkos_ENABLE_DEBUG_BOUNDS_CHECK=ON \
 -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
 -DAPEX_WITH_CUDA=TRUE \
--DCUDAToolkit_ROOT=${CUDATOOLKIT_HOME} \
+-DCUDAToolkit_ROOT=${CUDA} \
 .
 
-cmake --build build --parallel 16
-cmake --build build --parallel --target install
-cmake --build build --target tuning.tests
+cmake --build build8 --parallel 16
+cmake --build build8 --parallel --target install
+cmake --build build8 --target tuning.tests
 }
 
 dokokkos

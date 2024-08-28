@@ -1,5 +1,11 @@
 #!/bin/bash -e
 
+# Note: many extra Kokkos CMake variables are set to help with testing code changes.
+# A minimal working set of flags would be:
+# -DKokkos_ENABLE_TUNING=ON -DKokkos_ENABLE_OPENMP=ON -DKokkos_ENABLE_SERIAL=ON \
+# -DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_CUDA_LAMBDA=ON -DKokkos_ARCH_VOLTA70=ON \
+# -DKokkos_ARCH_NATIVE=ON
+
 module load cuda/11.7 cmake
 
 dokokkos() {

@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+# Note: many extra Kokkos CMake variables are set to help with testing code changes.
+# A minimal working set of flags would be:
+# -DKokkos_ENABLE_TUNING=ON -DKokkos_ENABLE_OPENMP=ON -DKokkos_ENABLE_SERIAL=ON \
+# -DKokkos_ENABLE_HIP=ON -DKokkos_ARCH_VEGA90A=ON -DKokkos_ARCH_NATIVE=ON
+
 module reset
 module load cmake
 module swap PrgEnv-cray PrgEnv-amd
