@@ -166,34 +166,42 @@ int main(int argc, char *argv[]){
         initArray(ar2, N, P);
         zeroArray(re, M, P);
 
-        // Context variable setup - needed to generate unique context hash for tuning.
+        // Context variable setup - needed to generate a unique context hash for tuning.
+        // Declare the variables and store the variable IDs
         size_t id[5];
         id[0] = 1; // default input for the region name ("mm2D")
         id[1] = 2; // default input for the region type ("parallel_for")
         id[2] = declareInputViewSize("matrix_size_M", M);
         id[3] = declareInputViewSize("matrix_size_N", N);
         id[4] = declareInputViewSize("matrix_size_P", P);
+
+        // create an input vector of variables with name, loop type, and view sizes.
         std::vector<KTE::VariableValue> input_vector{
             KTE::make_variable_value(id[0], mm2D),
-                KTE::make_variable_value(id[1], "parallel_for"),
-                KTE::make_variable_value(id[2], int64_t(M)),
-                KTE::make_variable_value(id[3], int64_t(N)),
-                KTE::make_variable_value(id[4], int64_t(P))
+            KTE::make_variable_value(id[1], "parallel_for"),
+            KTE::make_variable_value(id[2], int64_t(M)),
+            KTE::make_variable_value(id[3], int64_t(N)),
+            KTE::make_variable_value(id[4], int64_t(P))
         };
 
-        // Tuning tile size - setup
+        // Declare the variables and store the variable IDs
         size_t out_value_id[5];
+
+        // Tuning tile size - setup
         out_value_id[0] = declareOutputTileSize("M", "ti_out", M);
         out_value_id[1] = declareOutputTileSize("N", "tj_out", N);
         out_value_id[2] = declareOutputTileSize("P", "tk_out", P);
         // Tuning tile size - end setup
 
-        // scheduling policy setup
+        // scheduling policy - setup
         out_value_id[3] = declareOutputSchedules("schedule_out");
+        // scheduling policy - end setup
+
+        // thread count - setup
         int64_t max_threads = std::min(std::thread::hardware_concurrency(),
                 (unsigned int)(Kokkos::OpenMP::concurrency()));
         out_value_id[4] = declareOutputThreadCount("thread_count", max_threads);
-        // sehcduling policy - end setup
+        // thread count - end setup
 
         //The second argument to make_varaible_value might be a default value
         std::vector<KTE::VariableValue> answer_vector{
@@ -208,6 +216,10 @@ int main(int argc, char *argv[]){
         const auto kernel = KOKKOS_LAMBDA(int i, int j, int k){
             re(i,j) += ar1(i,j) * ar2(j,k);
         };
+
+        /* Iterate max_iterations times, so that we can explore the search
+         * space. Not all searches will converge - we have a large space!
+         * It's likely that exhaustive search will fail to converge. */
         for (int i = 0 ; i < Impl::max_iterations ; i++) {
             // request a context id
             size_t context = KTE::get_new_context_id();
@@ -219,6 +231,7 @@ int main(int argc, char *argv[]){
             // request new output values for the context
             KTE::request_output_values(context, answer_vector.size(), answer_vector.data());
 
+            // get the tiling factors
             int ti,tj,tk;
             ti = answer_vector[0].value.int_value;
             tj = answer_vector[1].value.int_value;
@@ -228,14 +241,6 @@ int main(int argc, char *argv[]){
             // there's probably a better way to set the thread count?
             int num_threads = answer_vector[4].value.int_value;
             int leftover_threads = max_threads - answer_vector[4].value.int_value;
-
-            // Report the tuning, if desired
-            /*
-            std::cout << "Tiling: [" << ti << "," << tj << "," << tk << "], ";
-            std::cout << "Schedule: " << scheduleNames[scheduleType] << ", ";
-            std::cout << "Threads: " << answer_vector[4].value.int_value;
-            std::cout << std::endl;
-            */
 
             // no tuning?
             if (!tuning) {
@@ -249,6 +254,12 @@ int main(int argc, char *argv[]){
                         );
             // use static schedule?
             } else if (scheduleType == StaticSchedule) {
+                // Report the tuning, if desired
+                std::cout << "Tiling: [" << ti << "," << tj << "," << tk << "], ";
+                std::cout << "Schedule: " << scheduleNames[scheduleType] << ", ";
+                std::cout << "Threads: " << answer_vector[4].value.int_value;
+                std::cout << std::endl;
+
                 // if using max threads, no need to partition
                 if (num_threads == max_threads) {
                     // static scheduling, tuned tiling
@@ -287,6 +298,7 @@ int main(int argc, char *argv[]){
                             mm2D, dynamic_policy, kernel);
                 }
             }
+            // end the context
             KTE::end_context(context);
         }
     }
