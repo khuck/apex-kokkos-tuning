@@ -23,34 +23,33 @@ int main(int argc, char *argv[]) {
     Kokkos::initialize(argc, argv);
     {
         Kokkos::print_configuration(std::cout, false);
-        int length = 1000000;
-        int min_index = 0;
+        int length = 32768;
+        /* To keep the kernel simple, we don't update first or last cells */
+        int min_index = 1;
         int max_index = length - 1;
         Kokkos::View<double *, Kokkos::HostSpace> stencil("stencil", length);
+        /* Simple 1d, 3-point stencil update - use the average of the left, right and current cells */
         const auto kernel = KOKKOS_LAMBDA(const int x) {
-            if (x == min_index) {
-                stencil(x) = (stencil(x) + stencil(x+1)) / 2.0;
-            } else if (x == max_index) {
-                stencil(x) = (stencil(x-1) + stencil(x)) / 2.0;
-            } else {
-                stencil(x) = (stencil(x-1) + stencil(x) + stencil(x+1)) / 3.0;
-            }
+            stencil(x) = (stencil(x-1) + stencil(x) + stencil(x+1)) / 3.0;
         };
-        for (int i = 0 ; i < 50 ; i++) {
+        /* We iterate so that we have enough samples to explore the search space.
+         * In a real application, this kernel would get called multiple times over
+         * the course of a simulation, and would eventually(?) converge. */
+        for (int i = 0 ; i < Impl::max_iterations ; i++) {
             fastest_of( "choose_one", 3, [&]() {
-                //std::cout << i << " Doing Serial stencil..." << std::endl;
+                /* Option 1: serial host space */
                 Kokkos::parallel_for("serial heat_transfer",
-                    Kokkos::RangePolicy<Kokkos::Serial>(0,length),
+                    Kokkos::RangePolicy<Kokkos::Serial>(min_index,max_index),
                     kernel);
                 }, [&]() {
-                //std::cout << i << " Doing Static OpenMP stencil..." << std::endl;
+                /* Option 2: dynamic schedule OpenMP host space */
                 Kokkos::parallel_for("openmp dynamic heat_transfer",
-                    Kokkos::RangePolicy<Kokkos::Schedule<Kokkos::Dynamic>, Kokkos::OpenMP>(0,length),
+                    Kokkos::RangePolicy<Kokkos::Schedule<Kokkos::Dynamic>, Kokkos::OpenMP>(min_index,max_index),
                     kernel);
                 }, [&]() {
-                //std::cout << i << " Doing Static OpenMP stencil..." << std::endl;
+                /* Option 3: static schedule OpenMP host space */
                 Kokkos::parallel_for("openmp static heat_transfer",
-                    Kokkos::RangePolicy<Kokkos::Schedule<Kokkos::Static>, Kokkos::OpenMP>(0,length),
+                    Kokkos::RangePolicy<Kokkos::Schedule<Kokkos::Static>, Kokkos::OpenMP>(min_index,max_index),
                     kernel);
                 }
             );

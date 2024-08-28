@@ -3,7 +3,8 @@ add_custom_target(tuning.tests)
 
 # Our set of programs
 set(tuning_programs
-    1d_annealing
+    1d_stencil
+    2d_stencil
     deep_copy_2
     deep_copy_3
     deep_copy_4
@@ -65,13 +66,20 @@ foreach(tuning_prog ${tuning_programs})
             PROPERTIES FIXTURES_CLEANUP test_${tuning_prog}_${tuning_policy}_teardown)
         if(${tuning_policy} STREQUAL "exhaustive" OR
            ${tuning_policy} STREQUAL "random")
-            set(window "1")
+            if(${tuning_prog} STREQUAL "1d_stencil")
+                set(window "5")
+            elseif(${tuning_prog} STREQUAL "2d_stencil")
+                set(window "2")
+            else()
+                set(window "1")
+            endif()
         elseif(${tuning_policy} STREQUAL "simulated_annealing" AND
                ${tuning_prog} STREQUAL "idk_jmm")
             set(window "1")
         else()
             set(window "2")
         endif()
+        # the 1d_stencil and 2d_stencil can have bigger windows
         set_tests_properties(test_${tuning_prog}_${tuning_policy} PROPERTIES
             ENVIRONMENT "OMP_NUM_THREADS=${NPROC};OMP_PROC_BIND=spread;OMP_PLACES=threads;APEX_KOKKOS_TUNING_WINDOW=${window};APEX_KOKKOS_TUNING_POLICY=${tuning_policy}"
             PASS_REGULAR_EXPRESSION "Tuning has converged"
