@@ -6,6 +6,7 @@ set(tuning_programs
     1d_stencil
     1d_stencil_chunk
     1d_stencil_team
+    1d_stencil_team_auto
     2d_stencil
     deep_copy_2
     deep_copy_3
@@ -46,6 +47,8 @@ foreach(tuning_prog ${tuning_programs})
     target_link_libraries(${tuning_prog} kokkos)
     add_dependencies (${tuning_prog} apex)
     add_dependencies (tuning.tests ${tuning_prog})
+    # This is needed to make sure local symbols are exported and we can dladdr them
+    set_property(TARGET ${tuning_prog} PROPERTY ENABLE_EXPORTS ON)
 
     # Do one test without any tuning
     add_test (NAME test_${tuning_prog}_no_tuning
