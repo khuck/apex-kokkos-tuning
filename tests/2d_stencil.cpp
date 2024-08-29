@@ -1,5 +1,5 @@
 /**
- * 2D_annealing
+ * 2D_stencil
  *
  * Complexity: low
  * Tuning problem:

@@ -1,5 +1,5 @@
 /**
- * 1D_annealing
+ * 1D_stencil_chunk
  *
  * Complexity: medium
  * Tuning problem:
