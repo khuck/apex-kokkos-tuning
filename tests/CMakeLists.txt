@@ -5,6 +5,7 @@ add_custom_target(tuning.tests)
 set(tuning_programs
     1d_stencil
     1d_stencil_chunk
+    1d_stencil_team
     2d_stencil
     deep_copy_2
     deep_copy_3

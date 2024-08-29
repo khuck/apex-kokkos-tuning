@@ -138,6 +138,7 @@ size_t declareOutputThreadCount(std::string varname, size_t limit) {
 int main(int argc, char *argv[]) {
     // surely there is a way to get this from Kokkos?
     bool tuning = false;
+    bool internal_tuning = Kokkos::tune_internals();
     char * tmp{getenv("APEX_KOKKOS_TUNING")};
     if (tmp != nullptr) {
         std::string tmpstr {tmp};
