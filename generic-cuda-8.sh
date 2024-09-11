@@ -12,7 +12,7 @@ dokokkos() {
 rm -rf build8
 set -x
 cmake -B build8 \
--DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 -DCMAKE_CXX_COMPILER=g++ \
 -DCMAKE_C_COMPILER=gcc \
 -DCMAKE_INSTALL_PREFIX=`pwd`/install8 \
@@ -33,6 +33,7 @@ cmake -B build8 \
 
 cmake --build build8 --parallel 16
 cmake --build build8 --parallel --target install
+export CUDA_VISIBLE_DEVICES=0
 cmake --build build8 --target tuning.tests
 }
 
