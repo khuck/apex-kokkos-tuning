@@ -25,7 +25,9 @@ set(tuning_policies
     exhaustive
     genetic_search
     random
-    simulated_annealing)
+    simulated_annealing
+    nelder_mead
+    automatic)
 
 include(ProcessorCount)
 ProcessorCount(NPROC)
@@ -81,6 +83,11 @@ foreach(tuning_prog ${tuning_programs})
         elseif(${tuning_policy} STREQUAL "simulated_annealing" AND
                ${tuning_prog} STREQUAL "idk_jmm")
             set(window "1")
+        elseif(${tuning_policy} STREQUAL "nelder_mead")
+            if (${tuning_prog} STREQUAL "idk_jmm" OR
+                ${tuning_prog} STREQUAL "1d_stencil")
+                set(window "1")
+            endif()
         else()
             set(window "2")
         endif()

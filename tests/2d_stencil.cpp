@@ -70,12 +70,14 @@ int main(int argc, char *argv[]) {
                     Kokkos::MDRangePolicy<Kokkos::Serial,
                         Kokkos::Rank<2>>({min_index, min_index}, {max_index, max_index}),
                     kernel);
+                    std::cout << "serial" << std::endl;
                 }, [&]() {
                 /* Option 2: OpenMP host space */
                 Kokkos::parallel_for("openmp 2D heat_transfer",
                     Kokkos::MDRangePolicy<Kokkos::OpenMP,
                         Kokkos::Rank<2>>({min_index, min_index}, {max_index, max_index}),
                     kernel);
+                    std::cout << "openmp" << std::endl;
                 }
             );
             /* Swap the views */
