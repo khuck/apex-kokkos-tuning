@@ -61,6 +61,7 @@ int main(int argc, char *argv[]) {
             }
             dest(x) = (source(x-1) + source(x) + source(x+1)) / 3.0;
         };
+        Kokkos::Profiling::ScopedRegion region("1d_stencil_team_auto search loop");
         /* We iterate so that we have enough samples to explore the search space.
          * In a real application, this kernel would get called multiple times over
          * the course of a simulation, and would eventually(?) converge. */

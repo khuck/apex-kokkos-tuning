@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
     Kokkos::print_configuration(std::cout, false);
     left_type left("left", data_size, data_size, data_size);
     right_type right("right", data_size, data_size, data_size);
+    Kokkos::Profiling::ScopedRegion region("deep_copy_3 search loop");
     for (int i = 0 ; i < 4 * Impl::max_iterations ; i++) {
         Kokkos::deep_copy(Kokkos::DefaultExecutionSpace{}, right, left);
     }

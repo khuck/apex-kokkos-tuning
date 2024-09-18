@@ -202,6 +202,7 @@ int main(int argc, char *argv[]) {
         };
 
 
+        Kokkos::Profiling::ScopedRegion region("1d_stencil_team search loop");
 
         /* We iterate so that we have enough samples to explore the search space.
          * In a real application, this kernel would get called multiple times over

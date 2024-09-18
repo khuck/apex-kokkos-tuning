@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
     view_type right("right_inp", data_size, data_size);
     view_type output("output", data_size, data_size);
 
+    Kokkos::Profiling::ScopedRegion region("idk_jmm search loop");
     for (int i = 0 ; i < Impl::max_iterations ; i++) {
         fastest_of(
             "bad_gemms", 2,

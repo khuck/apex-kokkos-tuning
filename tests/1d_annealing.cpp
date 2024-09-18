@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
                 stencil(x) = (stencil(x-1) + stencil(x) + stencil(x+1)) / 3.0;
             }
         };
+        Kokkos::Profiling::ScopedRegion region("1d_annealing search loop");
         for (int i = 0 ; i < 50 ; i++) {
             fastest_of( "choose_one", 3, [&]() {
                 //std::cout << i << " Doing Serial stencil..." << std::endl;

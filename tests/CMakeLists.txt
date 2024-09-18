@@ -61,10 +61,10 @@ foreach(tuning_prog ${tuning_programs})
     foreach(tuning_policy ${tuning_policies})
         # Test the tuning
         add_test (NAME test_${tuning_prog}_${tuning_policy}
-            COMMAND ${CMAKE_BINARY_DIR}/apex/src/scripts/apex_exec --apex:kokkos-tuning ${CMAKE_BINARY_DIR}/tests/${tuning_prog} --kokkos-tune-internals)
+            COMMAND ${CMAKE_BINARY_DIR}/apex/src/scripts/apex_exec --apex:kokkos-fence --apex:kokkos-tuning ${CMAKE_BINARY_DIR}/tests/${tuning_prog} --kokkos-tune-internals)
         # Test the cached convergence usage
         add_test (NAME test_${tuning_prog}_${tuning_policy}_cached
-            COMMAND ${CMAKE_BINARY_DIR}/apex/src/scripts/apex_exec --apex:kokkos-tuning ${CMAKE_BINARY_DIR}/tests/${tuning_prog} --kokkos-tune-internals)
+            COMMAND ${CMAKE_BINARY_DIR}/apex/src/scripts/apex_exec --apex:kokkos-fence --apex:kokkos-tuning ${CMAKE_BINARY_DIR}/tests/${tuning_prog} --kokkos-tune-internals)
         # Add a cleanup step to remove the convergence cache file
         add_test(NAME test_${tuning_prog}_${tuning_policy}_cleanup
             COMMAND ${CMAKE_COMMAND} -E

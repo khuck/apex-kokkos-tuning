@@ -4,6 +4,7 @@
 #include<Kokkos_Core.hpp>
 #include<unordered_map>
 #include<iostream>
+#include<Kokkos_Profiling_ScopedRegion.hpp>
 
 namespace Impl {
 

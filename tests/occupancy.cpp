@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
     Kokkos::print_configuration(std::cout, false);
     bool tuning = check_tuning();
     view_type left("process_this", 1000000, 25);
+    Kokkos::Profiling::ScopedRegion region("occupancy search loop");
     for (int i = 0 ; i < Impl::max_iterations ; i++) {
         Kokkos::RangePolicy<> p(0, left.extent(0));
         auto const p_occ = Kokkos::Experimental::prefer(

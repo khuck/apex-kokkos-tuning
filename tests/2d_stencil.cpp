@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
                          source(x-1,y)   + source(x,y)   + source(x+1,y)   +
                          source(x-1,y+1) + source(x,y+1) + source(x+1,y+1)) / 9.0;
         };
+        Kokkos::Profiling::ScopedRegion region("2d_stencil search loop");
         /* We iterate so that we have enough samples to explore the search space.
          * In a real application, this kernel would get called multiple times over
          * the course of a simulation, and would eventually(?) converge. */

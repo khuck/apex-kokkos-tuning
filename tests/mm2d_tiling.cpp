@@ -217,6 +217,7 @@ int main(int argc, char *argv[]){
             re(i,j) += ar1(i,j) * ar2(j,k);
         };
 
+        Kokkos::Profiling::ScopedRegion region("mm2d_tiling search loop");
         /* Iterate max_iterations times, so that we can explore the search
          * space. Not all searches will converge - we have a large space!
          * It's likely that exhaustive search will fail to converge. */
