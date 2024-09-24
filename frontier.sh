@@ -9,6 +9,7 @@ module reset
 module load cmake
 module swap PrgEnv-cray PrgEnv-amd
 module swap amd amd/5.7.1
+module load rocm/5.7.1
 module unload darshan-runtime
 export CRAYPE_LINK_TYPE=dynamic
 
@@ -24,7 +25,6 @@ cmake -B build \
 -DKokkos_ENABLE_OPENMP=ON \
 -DKokkos_ENABLE_SERIAL=ON \
 -DKokkos_ENABLE_HIP=ON \
--DKokkos_ARCH_VEGA90A=ON \
 -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=ON \
 -DKokkos_ARCH_NATIVE=ON \
 -DKokkos_ENABLE_COMPILER_WARNINGS=ON \
@@ -41,3 +41,4 @@ cmake --build build --target tuning.tests
 
 dokokkos
 
+#-DKokkos_ARCH_VEGA90A=ON \
