@@ -83,7 +83,7 @@ size_t create_categorical_int_tuner(std::string name, size_t num_options){
   return declare_output_type(name, info);
 }
 
-size_t create_fastest_implementation_id(){
+size_t create_fastest_implementation_id(const size_t count){
   using namespace Kokkos::Tools::Experimental;
   static size_t id;
   static bool done;
@@ -91,7 +91,7 @@ size_t create_fastest_implementation_id(){
     done = true;
     VariableInfo info;
     info.category = StatisticalCategory::kokkos_value_categorical;
-    info.type = ValueType::kokkos_value_string;
+    info.type = ValueType::kokkos_value_int64;
     info.valueQuantity = CandidateValueType::kokkos_value_unbounded;
     id = declare_input_type("playground.fastest_implementation_of", info);
   }
@@ -110,7 +110,7 @@ void fastest_of(const std::string& label, const size_t count, Implementations...
       return my_tuner;
     }();
     auto var_id = tuner_iter->second;
-    auto input_id = create_fastest_implementation_id();
+    auto input_id = create_fastest_implementation_id(count);
     VariableValue picked_implementation = make_variable_value(var_id,int64_t(0));
     VariableValue which_kernel = make_variable_value(var_id,label.c_str());
     which_kernel.value.int_value = -1;
