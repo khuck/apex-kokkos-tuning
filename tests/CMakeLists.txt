@@ -8,6 +8,8 @@ set(tuning_programs
     1d_stencil_team
     1d_stencil_team_auto
     2d_stencil
+    3d_27point_stencil
+    3d_7point_stencil
     deep_copy_2
     deep_copy_3
     deep_copy_4
