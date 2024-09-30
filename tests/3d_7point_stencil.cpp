@@ -29,13 +29,7 @@ constexpr int length{128};
 // helper function for matrix init
 void initArray(Kokkos::View<double ***, Kokkos::DefaultExecutionSpace::memory_space>& ar, size_t d1, size_t d2, size_t d3) {
     const auto kernel = KOKKOS_LAMBDA(const int x, const int y, const int z) {
-        for(size_t i=0; i<d1; i++){
-            for(size_t j=0; j<d2; j++){
-                for(size_t k=0; k<d3; k++){
-                    ar(i,j,k)= i + j + k;
-                }
-            }
-        }
+        ar(x,y,z)= x + y + z;
     };
     Kokkos::parallel_for("initialize",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace,

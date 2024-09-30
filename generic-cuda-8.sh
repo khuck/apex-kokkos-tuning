@@ -12,7 +12,7 @@ dokokkos() {
 rm -rf build8
 set -x
 cmake -B build8 \
--DCMAKE_BUILD_TYPE=Debug \
+-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 -DCMAKE_CXX_COMPILER=g++ \
 -DCMAKE_C_COMPILER=gcc \
 -DCMAKE_INSTALL_PREFIX=`pwd`/install8 \
