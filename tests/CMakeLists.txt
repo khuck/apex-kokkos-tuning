@@ -20,6 +20,7 @@ set(tuning_programs
     mdrange_gemm
     mdrange_gemm_occupancy
     occupancy
+    meta-smoother
     )
 
 # Our set of tuning methods to test
