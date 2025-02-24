@@ -5,12 +5,12 @@
 # -DKokkos_ENABLE_TUNING=ON -DKokkos_ENABLE_OPENMP=ON -DKokkos_ENABLE_SERIAL=ON \
 # -DKokkos_ENABLE_HIP=ON -DKokkos_ARCH_VEGA90A=ON -DKokkos_ARCH_NATIVE=ON
 
-module reset
-module load cmake
-module swap PrgEnv-cray PrgEnv-amd
-module swap amd amd/5.7.1
-module load rocm/5.7.1
-module unload darshan-runtime
+#module reset
+#module load cmake
+#module swap PrgEnv-cray PrgEnv-amd
+#module swap amd amd/5.7.1
+#module load rocm/5.7.1
+#module unload darshan-runtime
 export CRAYPE_LINK_TYPE=dynamic
 
 dokokkos() {
@@ -26,10 +26,10 @@ cmake -B build \
 -DKokkos_ENABLE_SERIAL=ON \
 -DKokkos_ENABLE_HIP=ON \
 -DKokkos_ENABLE_AGGRESSIVE_VECTORIZATION=ON \
+-DKokkos_ENABLE_DEBUG=ON \
+-DKokkos_ENABLE_DEBUG_DUALVIEW_MODIFY_CHECK=ON \
+-DKokkos_ENABLE_DEBUG_BOUNDS_CHECK=ON \
 -DKokkos_ARCH_NATIVE=ON \
--DKokkos_ENABLE_COMPILER_WARNINGS=ON \
--DKokkos_ENABLE_DEPRECATED_CODE_4=ON \
--DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
 -DAPEX_WITH_HIP=TRUE \
 -DROCM_ROOT=${ROCM_PATH} \
 .
@@ -42,3 +42,7 @@ cmake --build build --target tuning.tests
 dokokkos
 
 #-DKokkos_ARCH_VEGA90A=ON \
+#-DROCTRACER_ROOT=${ROCM_PATH} \
+#-DROCPROFILER_ROOT=${ROCM_PATH} \
+#-DROCTX_ROOT=${ROCM_PATH} \
+#-DRSMI_ROOT=${ROCM_PATH} \

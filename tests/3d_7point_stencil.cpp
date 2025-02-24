@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
          * In a real application, this kernel would get called multiple times over
          * the course of a simulation, and would eventually(?) converge. */
         for (int i = 0 ; i < 4 * Impl::max_iterations ; i++) {
-                Kokkos::parallel_for("3D 27-point jacobi",
+                Kokkos::parallel_for("3D 7-point jacobi",
                     Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace,
                                         Kokkos::Rank<3>>
                         ({min_index, min_index, min_index},
